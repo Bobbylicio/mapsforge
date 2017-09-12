@@ -91,6 +91,7 @@ Then you add them to a list `tagList.add(new Tag("addr:street", "Bodestraße"))`
 The DB schema consists of:
 - `poi_categories` with the categories tree
 - `poi_data` with the POI information
+- `poi_category_map` with the POI categories mapping
 - Virtual & shadow correlated tables holding the R-tree index
 - `metadata` with the DB metadata
 
@@ -99,3 +100,4 @@ The DB schema consists of:
 |**Version**|**Date**|**Changes**|
 |-----------|--------|-----------|
 |1|2015-11-04|Initial release of the specification|
+|2|2017-09-12|<ul><li>POI multiple categories</li></ul>|
