@@ -1,8 +1,6 @@
 # POI API
 
-This article describes how to use the POI API from the mapsforge POI library.
-
-**The library is currently in beta state.** It came from the `prototypes` branch.
+This article describes how to use the POI API in mapsforge POI library (from `prototypes` branch).
 
 If you have any questions or problems, don't hesitate to ask our public [mapsforge-dev](https://groups.google.com/group/mapsforge-dev) mailing list for help. You can also report bugs and improvement requests via our [issue tracker](https://github.com/mapsforge/mapsforge/issues).
 
