@@ -76,36 +76,6 @@ class AwtPoiPersistenceManager extends AbstractPoiPersistenceManager {
 
         // Load categories from database
         this.categoryManager = new AwtPoiCategoryManager(this.conn);
-
-        // Queries
-        try {
-            // Finds a POI categories by its unique ID
-            if (getPoiFileInfo().version < 2) {
-                this.findCatByIDStatement = this.conn.prepareStatement(DbConstants.FIND_CATEGORIES_BY_ID_STATEMENT_V1);
-            } else {
-                this.findCatByIDStatement = this.conn.prepareStatement(DbConstants.FIND_CATEGORIES_BY_ID_STATEMENT);
-            }
-            // Finds a POI data by its unique ID
-            this.findDataByIDStatement = this.conn.prepareStatement(DbConstants.FIND_DATA_BY_ID_STATEMENT);
-            // Finds a POI location by its unique ID
-            this.findLocByIDStatement = this.conn.prepareStatement(DbConstants.FIND_LOCATION_BY_ID_STATEMENT);
-
-            // Inserts a POI into index and adds its data
-            if (getPoiFileInfo().version >= 2) {
-                this.insertPoiCatStatement = this.conn.prepareStatement(DbConstants.INSERT_CATEGORY_MAP_STATEMENT);
-                this.insertPoiDataStatement = this.conn.prepareStatement(DbConstants.INSERT_DATA_STATEMENT);
-            }
-            this.insertPoiLocStatement = this.conn.prepareStatement(DbConstants.INSERT_INDEX_STATEMENT);
-
-            // Deletes a POI given by its ID
-            if (getPoiFileInfo().version >= 2) {
-                this.deletePoiCatStatement = this.conn.prepareStatement(DbConstants.DELETE_CATEGORY_MAP_STATEMENT);
-            }
-            this.deletePoiDataStatement = this.conn.prepareStatement(DbConstants.DELETE_DATA_STATEMENT);
-            this.deletePoiLocStatement = this.conn.prepareStatement(DbConstants.DELETE_INDEX_STATEMENT);
-        } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, e.getMessage(), e);
-        }
     }
 
     /**
@@ -274,6 +244,14 @@ class AwtPoiPersistenceManager extends AbstractPoiPersistenceManager {
     private Set<PoiCategory> findCategoriesByID(long poiID) {
         ResultSet rs = null;
         try {
+            if (this.findCatByIDStatement == null) {
+                if (getPoiFileInfo().version < 2) {
+                    this.findCatByIDStatement = this.conn.prepareStatement(DbConstants.FIND_CATEGORIES_BY_ID_STATEMENT_V1);
+                } else {
+                    this.findCatByIDStatement = this.conn.prepareStatement(DbConstants.FIND_CATEGORIES_BY_ID_STATEMENT);
+                }
+            }
+
             this.findCatByIDStatement.clearParameters();
 
             this.findCatByIDStatement.setLong(1, poiID);
@@ -307,6 +285,10 @@ class AwtPoiPersistenceManager extends AbstractPoiPersistenceManager {
     private Set<Tag> findDataByID(long poiID) {
         ResultSet rs = null;
         try {
+            if (this.findDataByIDStatement == null) {
+                this.findDataByIDStatement = this.conn.prepareStatement(DbConstants.FIND_DATA_BY_ID_STATEMENT);
+            }
+
             this.findDataByIDStatement.clearParameters();
 
             this.findDataByIDStatement.setLong(1, poiID);
@@ -404,6 +386,10 @@ class AwtPoiPersistenceManager extends AbstractPoiPersistenceManager {
     private LatLong findLocationByID(long poiID) {
         ResultSet rs = null;
         try {
+            if (this.findLocByIDStatement == null) {
+                this.findLocByIDStatement = this.conn.prepareStatement(DbConstants.FIND_LOCATION_BY_ID_STATEMENT);
+            }
+
             this.findLocByIDStatement.clearParameters();
 
             this.findLocByIDStatement.setLong(1, poiID);
@@ -461,6 +447,16 @@ class AwtPoiPersistenceManager extends AbstractPoiPersistenceManager {
     @Override
     public void insertPointsOfInterest(Collection<PointOfInterest> pois) {
         try {
+            if (this.insertPoiLocStatement == null) {
+                this.insertPoiLocStatement = this.conn.prepareStatement(DbConstants.INSERT_INDEX_STATEMENT);
+            }
+            if (this.insertPoiDataStatement == null) {
+                this.insertPoiDataStatement = this.conn.prepareStatement(DbConstants.INSERT_DATA_STATEMENT);
+            }
+            if (this.insertPoiCatStatement == null) {
+                this.insertPoiCatStatement = this.conn.prepareStatement(DbConstants.INSERT_CATEGORY_MAP_STATEMENT);
+            }
+
             this.insertPoiLocStatement.clearParameters();
             this.insertPoiDataStatement.clearParameters();
             this.insertPoiCatStatement.clearParameters();
@@ -546,19 +542,13 @@ class AwtPoiPersistenceManager extends AbstractPoiPersistenceManager {
      */
     @Override
     public void readPoiFileInfo() {
-        // Prepare metadataStatement separately, because it's decisive for the further poi specification handling
-        if (this.metadataStatement == null) {
-            try {
-                this.metadataStatement = this.conn.prepareStatement(DbConstants.FIND_METADATA_STATEMENT);
-            } catch (Exception e) {
-                LOGGER.log(Level.SEVERE, e.getMessage(), e);
-            }
-        }
-
         PoiFileInfoBuilder poiFileInfoBuilder = new PoiFileInfoBuilder();
 
-        // Query
         try {
+            if (this.metadataStatement == null) {
+                this.metadataStatement = this.conn.prepareStatement(DbConstants.FIND_METADATA_STATEMENT);
+            }
+
             ResultSet rs = this.metadataStatement.executeQuery();
             while (rs.next()) {
                 String name = rs.getString(1);
@@ -604,6 +594,16 @@ class AwtPoiPersistenceManager extends AbstractPoiPersistenceManager {
     @Override
     public void removePointOfInterest(PointOfInterest poi) {
         try {
+            if (this.deletePoiLocStatement == null) {
+                this.deletePoiLocStatement = this.conn.prepareStatement(DbConstants.DELETE_INDEX_STATEMENT);
+            }
+            if (this.deletePoiDataStatement == null) {
+                this.deletePoiDataStatement = this.conn.prepareStatement(DbConstants.DELETE_DATA_STATEMENT);
+            }
+            if (this.deletePoiCatStatement == null) {
+                this.deletePoiCatStatement = this.conn.prepareStatement(DbConstants.DELETE_CATEGORY_MAP_STATEMENT);
+            }
+
             this.deletePoiLocStatement.clearParameters();
             this.deletePoiDataStatement.clearParameters();
             this.deletePoiCatStatement.clearParameters();
